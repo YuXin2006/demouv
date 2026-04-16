@@ -189,4 +189,190 @@ df.groupby('gender').mean()#按性别分组求平均值
 ```
 
 ### 2.3.3 合并与连接操作
+```python
+data.merge(df1,df2,on='name',how='inner')#内合并(交集)  
+data.merge(df1,df2,on='name',how='outer')#外合并(并集)
+data.merge(df1,df2,on='name',how='left')#左合并
+data.merge(df1,df2,on='name',how='right')#右合并
+data.merge(df1,df2,on='name',how='cross')#交叉合并
+```
+# 3. 使用pandas进行数据读取
+## 3.1 读取CSV文件
+先创建一个generate_data.csv文件用于生成一千条模拟数据的CSV文件
+```python
+import pandas as pd
 
+df = pd.read_csv("data.csv")
+print(df)
+```
+以下是read_csv()方法的参数
+```python
+pd.read_csv(
+    "data.csv",
+    sep=",",        # 分隔符
+    header=0,      # 第 0 行是列名
+    index_col=0,   # 第 0 列作为行索引
+    encoding="utf-8"
+)   
+```
+还可以使用usecols参数指定要读取的列,优化性能
+```python
+df = pd.read_csv("data.csv",usecols=["name", "score"])
+print(df)
+```
+### 对于csv大文件读取
+nrows参数可以指定只读取前n行数据，避免内存溢出
+```python
+df = pd.read_csv("big.csv", nrows=1000)#读取前1000行
+```
+对于超大文件，chunksize参数可以指定每次读取的行数，避免内存溢出
+```python
+chunk_iter = pd.read_csv("big.csv", chunksize=10000)
+for chunk in chunk_iter:
+    print(chunk.shape)
+```
+
+## 3.2 读取Excel文件
+```python
+df = pd.read_excel("large_sales_data.xlsx")
+df = pd.read_excel("data.xlsx", sheet_name="Sheet2")#注意指定sheet_name参数，默认读取第一个sheet
+```
+和csv一样也可以使用nrows或参数指定只读取前n行数据，避免内存溢出
+```python
+df = pd.read_excel("big.xlsx", nrows=1000)#读取前1000行
+```
+## 3.3 读取JSON文件
+基本用法:
+```python
+df = pd.read_json("large_sales_data.json")
+print(df)
+```
+### 3.3.1 json常见结构的读取方法
+对于列表型json
+```python
+[
+  {"A": 1, "B": 2},
+  {"A": 3, "B": 4}
+]
+pd.read_json("data.json")#默认读取列表型json
+print(df)
+```
+对于嵌套型json
+```python
+[
+  {
+    "id": 1,
+    "info": {"name": "张三", "age": 18}
+  }
+]
+pd.json_normalize(data)
+```
+对于键值对型json
+```python
+{
+  "张三": {"age": 18, "score": 90},
+  "李四": {"age": 19, "score": 85}
+}
+df = pd.read_json("data.json")
+df = df.T   # 转置
+print(df)
+```
+### 3.3.2 orient 
+一句话先记住 orient告诉 Pandas：JSON 的外层结构，是按「行」组织，还是按「列」组织。
+orient参数可以指定json文件的取向，默认是"columns"，也可以指定为"index"、"records"、"split"、"table"等
+
+records: 标准json结构,如web api
+```python
+[
+  {"name": "张三", "age": 18},
+  {"name": "李四", "age": 19}
+]
+pd.read_json("data.json",orient="records")
+```
+
+index: 每个json对象的key作为行索引
+```python
+{
+  "row1": {"name": "张三", "age": 18},
+  "row2": {"name": "李四", "age": 19}
+}
+pd.read_json("data.json",orient="index")
+```
+columns: json对象的key作为列索引
+
+table: 以表格形式组织数据，类似数据库表的结构
+```python
+{
+  "schema": {
+    "fields": [
+      {"name": "name", "type": "string"},
+      {"name": "age", "type": "integer"}
+    ],
+    "primaryKey": ["name"]
+  },
+  "data": [
+    {"name": "张三", "age": 18},
+    {"name": "李四", "age": 19}
+  ]
+}
+pd.read_json("data.json",orient="table")
+```
+
+
+## 3.4 读取SQL数据库
+这是核心函数，sql参数是SQL语句，con参数是数据库连接对象。
+```python
+pd.read_sql(sql, con)
+```
+### 读取mysql/postgresql数据库
+#### 1安装依赖
+```python
+pip install sqlalchemy pymysql
+```
+#### 2创建连接
+```python
+from sqlalchemy import create_engine
+
+engine = create_engine(
+    "mysql+pymysql://user:password@localhost:3306/testdb"
+)
+```
+#### 3读取数据
+```python
+df = pd.read_sql(
+    "SELECT * FROM orders LIMIT 1000",
+    engine
+)
+```
+
+### read_sql()常用参数
+```python
+pd.read_sql(
+    sql="SELECT * FROM table",
+    con=engine,
+    index_col="id",        # 指定索引
+    coerce_float=True,     # 自动转 float
+    parse_dates=["created_at"]
+)
+```
+### 对于大量数据读取
+chunksize参数可以指定每次读取的行数，避免内存溢出
+```python
+for chunk in pd.read_sql(
+    "SELECT * FROM big_table",
+    engine,
+    chunksize=10000
+):
+    print(chunk.shape)
+```    
+只读取指定列数据
+```python
+pd.read_sql(
+    "SELECT id, name FROM users",
+    engine
+)
+```
+## 3.5 读取HTML文件
+```python
+df = pd.read_html("data.html")
+```
