@@ -376,3 +376,66 @@ pd.read_sql(
 ```python
 df = pd.read_html("data.html")
 ```
+# 4. logging配置
+## 4.1基础配置
+```python
+import logging
+
+# 基础配置
+logging.basicConfig(
+    level=logging.DEBUG, # 设置级别: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    filemode='w',
+    filename='app.log'
+)
+
+logging.debug("this is a debug msg")
+```
+logging的级别从debug向上递增 级别低的可以执行级别高的操作
+
+## 4.2 在agent开发中的基础日志配置
+```python 
+import logging
+
+# 基础配置
+logging.basicConfig(
+    level=logging.INFO, # 设置级别: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+logger = logging.getLogger("AgentLogger")
+
+logger.info("Agent 启动完成...")
+logger.error("API 调用超时！")
+```
+## 4.2 在agent开发中的进阶日志配置：多处理器
+Agent 通常需要两套日志：一套在终端实时看进度，一套存进文件做离线评估。
+```python
+import logging
+
+# 1. 创建 Logger 对象
+logger = logging.getLogger("MasterAgent")
+logger.setLevel(logging.DEBUG) # 总开关设为最低
+
+# 2. 创建“终端”处理器（显示 INFO 以上）
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# 3. 创建“文件”处理器（记录 DEBUG 详细信息，用于复盘）
+file_handler = logging.FileHandler('agent_debug.log', encoding='utf-8')
+file_handler.setLevel(logging.DEBUG)
+
+# 4. 设置不同的格式
+formatter = logging.Formatter('%(name)s [%(levelname)s] -> %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+# 5. 添加到 Logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+logger.debug("这是给开发者看的详细 Prompt 调试信息")
+logger.info("这是给用户看的任务执行进度")
+```
