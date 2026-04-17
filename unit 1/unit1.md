@@ -439,3 +439,34 @@ logger.addHandler(file_handler)
 logger.debug("这是给开发者看的详细 Prompt 调试信息")
 logger.info("这是给用户看的任务执行进度")
 ```
+
+# 5.pydantic
+如果说 LLM 是一个“满嘴跑火车”的艺术家，Pydantic 就是那个手持表格、严格执法的“质检员”。在 Agent 架构中，它负责将模型输出的模糊文本，强制转化为代码可以直接运行的结构化数据。
+
+pydantic就像带检验功能的detaclass，有三大核心功能:*自动类型转换*  *自动检验*  *拒绝多余字段* 
+
+可以帮助检验数据是否正确或者把脏数据转化为正确格式的数据
+## 5.1 最小示例
+```python 
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: int
+    name: str
+    age: int = 18  # 默认值
+u = User(id=1, name="张三")
+print(u)
+```    
+## 5.2 optional
+可以使用optional 指定字段默认值
+``` python
+from typing import Optional
+class User(BaseModel):
+    id:int
+    name:str
+    age:int
+    salary:Optional[float]=None#默认为none
+    is_active:Optional[bool]=True#默认为true
+u=User(id=1,name='李四',age=18)
+print(u)    
+```
