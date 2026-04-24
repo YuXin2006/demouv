@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "agent-learning",
+			"path": "../../agent-learning"
+		}
+	],
+	"settings": {}
+}

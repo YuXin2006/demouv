@@ -22,4 +22,4 @@ uv venv
 uv add pandas langchain ipykernel
 ```
 
-然后就可以再demouv中进行分章节学习
+然后就可以在demouv目录中进行分章节学习
