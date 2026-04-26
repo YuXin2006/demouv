@@ -160,7 +160,7 @@ round(cosine_similarity.item(), 4)
 
 # 4 存储
 可以使用三种向量存储工具 :*Faiss*,*ChromaDB*,*
-# 4.1 Faiss
+## 4.1 Faiss
 faiss有三个关键词:向量存储 索引(核心) 距离度量
 
 1. 数据量 < 1万条 IndexFlatL2 简单、精准、无需训练。
@@ -198,6 +198,7 @@ from langchain_community.vectorstores import FAISS
 db=FAISS.from_documents(docs, embeddings)
 db
 ```
+## 4.2 ChromaDB
 这里使用chromaDB作为数据库
 ```python
 from langchain_community_vectorstores import Chroma
